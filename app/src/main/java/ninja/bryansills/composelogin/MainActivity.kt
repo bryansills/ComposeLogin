@@ -4,7 +4,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.TopAppBar
+import androidx.compose.navigation.NavHost
+import androidx.compose.navigation.composable
+import androidx.compose.navigation.rememberNavController
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.setContent
 import androidx.ui.tooling.preview.Preview
@@ -15,10 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             ComposeLoginTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
-                }
+                BasicNav()
             }
         }
     }
@@ -34,5 +36,16 @@ fun Greeting(name: String) {
 fun DefaultPreview() {
     ComposeLoginTheme {
         Greeting("Android")
+    }
+}
+
+@Composable
+fun AppBarDemo() {
+    val navController = rememberNavController()
+
+    Scaffold(topBar = { TopAppBar(title = { Text(text = "Hello") }) }) {
+        NavHost(navController, startDestination = "Home") {
+            composable("Home") { DefaultPreview() }
+        }
     }
 }
