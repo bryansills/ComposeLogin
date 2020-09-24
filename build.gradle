@@ -18,14 +18,20 @@ buildscript {
     }
 }
 
-allprojects {
+subprojects {
     repositories {
         google()
         jcenter()
-        maven { url 'https://androidx.dev/snapshots/builds/6858531/artifacts/ui/repository' }
+        maven { url 'https://androidx.dev/snapshots/builds/6859579/artifacts/ui/repository' }
     }
 
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    // Create a configuration which allows us to intercept the JARs, and add them to
+    // Kotlin Compiler freeCompilerArgs. This is needed because we can't currently use the
+    // built-in `compose` feature in AGP, since it depends on the old Compose Compiler artifacts.
+    // TODO: Remove this once AGP releases 4.2.0-alpha13 and uses the new Compose Compiler artifact name
+    def compilerPluginConfig = project.configurations.create("kotlinCompilerPlugin")
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach { compile ->
         kotlinOptions {
             // Treat all Kotlin warnings as errors
             allWarningsAsErrors = true
@@ -36,6 +42,17 @@ allprojects {
             // Allow use of @OptIn
             freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
             freeCompilerArgs += "-Xallow-jvm-ir-dependencies"
+        }
+
+        compile.dependsOn(compilerPluginConfig)
+        compile.doFirst {
+            if (!compilerPluginConfig.isEmpty()) {
+                // Add the compiler plugin JARs using the -Xplugin flag
+                compile.kotlinOptions.freeCompilerArgs +=
+                        "-Xplugin=${compilerPluginConfig.files.first()}"
+                // Need to turn on the IR compiler too
+                compile.kotlinOptions.useIR = true
+            }
         }
     }
 }
