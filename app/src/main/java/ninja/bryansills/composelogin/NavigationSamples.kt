@@ -1,20 +1,20 @@
 package ninja.bryansills.composelogin
 
+import android.os.Bundle
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
-import androidx.compose.navigation.AmbientNavController
-import androidx.compose.navigation.NavHost
-import androidx.compose.navigation.composable
-import androidx.compose.navigation.navigate
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.LightGray
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.AmbientNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigate
 
 sealed class Screen(val title: String) {
     object Profile : Screen("Profile")
@@ -24,21 +24,27 @@ sealed class Screen(val title: String) {
 
 @Composable
 fun BasicNav() {
+    var isLoggedIn by remember { mutableStateOf(false) }
     NavHost(startDestination = "Profile") {
-        composable("Profile") { Profile() }
+        composable("Profile") { Profile(isLoggedIn) { isLoggedIn = !isLoggedIn } }
         composable("Dashboard") { Dashboard() }
-        composable("Scrollable") { Scrollable() }
+        if (isLoggedIn) {
+            composable("Scrollable") { Scrollable() }
+        }
     }
 }
 
 @Composable
-fun Profile() {
+fun Profile(isLoggedIn: Boolean, toggleLogin: () -> Unit) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
         Text(text = Screen.Profile.title)
         NavigateButton(Screen.Dashboard)
         Divider(color = Color.Black)
         NavigateButton(Screen.Scrollable)
         Spacer(Modifier.weight(1f))
+        Button(onClick = toggleLogin) {
+            Text(text = "Toggle Login to: ${!isLoggedIn}")
+        }
         NavigateBackButton()
     }
 }
@@ -66,11 +72,10 @@ fun Scrollable() {
 }
 
 @Composable
-fun NavigateButton(screen: Screen) {
+fun NavigateButton(screen: Screen, args: Bundle? = null) {
     val navController = AmbientNavController.current
     Button(
-        onClick = { navController.navigate(screen.title) },
-        backgroundColor = LightGray,
+        onClick = { navController.navigate(screen.title, args) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = "Navigate to " + screen.title)
@@ -83,7 +88,6 @@ fun NavigateBackButton() {
     if (navController.previousBackStackEntry != null) {
         Button(
             onClick = { navController.popBackStack() },
-            backgroundColor = LightGray,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Go to Previous screen")

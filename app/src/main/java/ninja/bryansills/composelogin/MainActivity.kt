@@ -3,15 +3,13 @@ package ninja.bryansills.composelogin
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.TopAppBar
-import androidx.compose.navigation.NavHost
-import androidx.compose.navigation.composable
-import androidx.compose.navigation.rememberNavController
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.setContent
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.ui.tooling.preview.Preview
 import ninja.bryansills.composelogin.ui.ComposeLoginTheme
 
