@@ -11,10 +11,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigate
-import androidx.navigation.compose.rememberNavController
 
 sealed class Screen(val title: String) {
     object Profile : Screen("Profile")
@@ -23,8 +23,7 @@ sealed class Screen(val title: String) {
 }
 
 @Composable
-fun BasicNav(isLoggedIn: Boolean, toggleLogin: () -> Unit) {
-    val navController = rememberNavController()
+fun BasicNav(navController: NavHostController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
     NavHost(navController, startDestination = "Profile") {
         composable("Profile") { Profile(navController, isLoggedIn, toggleLogin)  }
         composable("Dashboard") { Dashboard(navController) }
@@ -91,6 +90,11 @@ fun NavigateBackButton(navController: NavController) {
             Text(text = "Go to Previous screen")
         }
     }
+}
+
+@Composable
+fun CountButton(count: Int, onClick: () -> Unit) {
+    Button(onClick = onClick) { Text(text = "THE COUNT IS $count") }
 }
 
 private val phrases = listOf(

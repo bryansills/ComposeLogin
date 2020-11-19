@@ -2,15 +2,12 @@ package ninja.bryansills.composelogin
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Text
-import androidx.compose.material.Scaffold
-import androidx.compose.material.TopAppBar
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.setContent
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.ui.tooling.preview.Preview
 import ninja.bryansills.composelogin.ui.ComposeLoginTheme
 
 class MainActivity : AppCompatActivity() {
@@ -19,32 +16,11 @@ class MainActivity : AppCompatActivity() {
         setContent {
             ComposeLoginTheme {
                 var isLoggedIn by remember { mutableStateOf(false) }
-                BasicNav(isLoggedIn) { isLoggedIn = !isLoggedIn }
+                val toggleLogin = { isLoggedIn = isLoggedIn.not() }
+                val navController = rememberNavController()
+
+                BasicNav(navController, isLoggedIn, toggleLogin)
             }
-        }
-    }
-}
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    ComposeLoginTheme {
-        Greeting("Android")
-    }
-}
-
-@Composable
-fun AppBarDemo() {
-    val navController = rememberNavController()
-
-    Scaffold(topBar = { TopAppBar(title = { Text(text = "Hello") }) }) {
-        NavHost(navController, startDestination = "Home") {
-            composable("Home") { DefaultPreview() }
         }
     }
 }
