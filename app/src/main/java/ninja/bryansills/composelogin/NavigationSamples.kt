@@ -1,20 +1,20 @@
 package ninja.bryansills.composelogin
 
-import android.os.Bundle
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.AmbientNavController
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigate
+import androidx.navigation.compose.rememberNavController
 
 sealed class Screen(val title: String) {
     object Profile : Screen("Profile")
@@ -23,59 +23,58 @@ sealed class Screen(val title: String) {
 }
 
 @Composable
-fun BasicNav() {
-    var isLoggedIn by remember { mutableStateOf(false) }
-    NavHost(startDestination = "Profile") {
-        composable("Profile") { Profile(isLoggedIn) { isLoggedIn = !isLoggedIn } }
-        composable("Dashboard") { Dashboard() }
+fun BasicNav(isLoggedIn: Boolean, toggleLogin: () -> Unit) {
+    val navController = rememberNavController()
+    NavHost(navController, startDestination = "Profile") {
+        composable("Profile") { Profile(navController, isLoggedIn, toggleLogin)  }
+        composable("Dashboard") { Dashboard(navController) }
         if (isLoggedIn) {
-            composable("Scrollable") { Scrollable() }
+            composable("Scrollable") { Scrollable(navController) }
         }
     }
 }
 
 @Composable
-fun Profile(isLoggedIn: Boolean, toggleLogin: () -> Unit) {
+fun Profile(navController: NavController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
         Text(text = Screen.Profile.title)
-        NavigateButton(Screen.Dashboard)
+        NavigateButton(navController, Screen.Dashboard)
         Divider(color = Color.Black)
-        NavigateButton(Screen.Scrollable)
+        NavigateButton(navController, Screen.Scrollable)
         Spacer(Modifier.weight(1f))
         Button(onClick = toggleLogin) {
             Text(text = "Toggle Login to: ${!isLoggedIn}")
         }
-        NavigateBackButton()
+        NavigateBackButton(navController)
     }
 }
 
 @Composable
-fun Dashboard() {
+fun Dashboard(navController: NavController) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
         Text(text = Screen.Dashboard.title)
         Spacer(Modifier.weight(1f))
-        NavigateBackButton()
+        NavigateBackButton(navController)
     }
 }
 
 @Composable
-fun Scrollable() {
+fun Scrollable(navController: NavController) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
-        NavigateButton(Screen.Dashboard)
+        NavigateButton(navController, Screen.Dashboard)
         ScrollableColumn(Modifier.weight(1f)) {
             phrases.forEach { phrase ->
                 Text(phrase, fontSize = 30.sp)
             }
         }
-        NavigateBackButton()
+        NavigateBackButton(navController)
     }
 }
 
 @Composable
-fun NavigateButton(screen: Screen, args: Bundle? = null) {
-    val navController = AmbientNavController.current
+fun NavigateButton(navController: NavController, screen: Screen) {
     Button(
-        onClick = { navController.navigate(screen.title, args) },
+        onClick = { navController.navigate(screen.title) },
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(text = "Navigate to " + screen.title)
@@ -83,8 +82,7 @@ fun NavigateButton(screen: Screen, args: Bundle? = null) {
 }
 
 @Composable
-fun NavigateBackButton() {
-    val navController = AmbientNavController.current
+fun NavigateBackButton(navController: NavController) {
     if (navController.previousBackStackEntry != null) {
         Button(
             onClick = { navController.popBackStack() },

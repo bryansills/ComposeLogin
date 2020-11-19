@@ -1,16 +1,17 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     ext {
-        compose_version = '1.0.0-SNAPSHOT'
-        compose_navigation_version = '1.0.0-SNAPSHOT'
+        android_gradle_plugin_version = '4.2.0-alpha16'
+        compose_version = '1.0.0-alpha07'
+        compose_navigation_version = '1.0.0-alpha02'
+        kotlin_version = '1.4.10'
     }
-    ext.kotlin_version = "1.4.10"
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.0-alpha13"
+        classpath "com.android.tools.build:gradle:$android_gradle_plugin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -19,7 +20,6 @@ subprojects {
     repositories {
         google()
         jcenter()
-        maven { url 'https://androidx.dev/snapshots/builds/6910220/artifacts/repository' }
     }
 }
 
