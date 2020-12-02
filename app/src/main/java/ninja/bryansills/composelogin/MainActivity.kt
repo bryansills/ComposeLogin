@@ -28,7 +28,11 @@ class MainActivity : AppCompatActivity() {
                 val toggleLogin = { isLoggedIn = isLoggedIn.not() }
                 val navController = rememberNavController()
 
-                BasicNav(navController, isLoggedIn, toggleLogin)
+                NavigationRoot(
+                    navController = navController,
+                    isLoggedIn = isLoggedIn,
+                    toggleLogin = toggleLogin
+                )
             }
         }
     }
@@ -41,9 +45,9 @@ sealed class Screen(val title: String) {
 }
 
 @Composable
-fun BasicNav(navController: NavHostController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
+fun NavigationRoot(navController: NavHostController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
     val navigatorFactory = NavigatorFactory(navController)
-    val navigator: Navigator by remember { mutableStateOf(navigatorFactory.get(isLoggedIn)) }
+    val navigator = navigatorFactory.get(isLoggedIn)
 
     NavHost(navController, startDestination = "Profile") {
         composable("Profile") { Profile(navigator, isLoggedIn, toggleLogin)  }
