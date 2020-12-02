@@ -3,22 +3,19 @@ package ninja.bryansills.composelogin
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
-//import androidx.compose.material.Text
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.setContent
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigate
 import androidx.navigation.compose.rememberNavController
 import ninja.bryansills.composelogin.ui.ComposeLoginTheme
 
@@ -45,67 +42,72 @@ sealed class Screen(val title: String) {
 
 @Composable
 fun BasicNav(navController: NavHostController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
+    val navigatorFactory = NavigatorFactory(navController)
+    val navigator: Navigator by remember { mutableStateOf(navigatorFactory.get(isLoggedIn)) }
+
     NavHost(navController, startDestination = "Profile") {
-        composable("Profile") { Profile(navController, isLoggedIn, toggleLogin)  }
-        composable("Dashboard") { Dashboard(navController) }
-        if (isLoggedIn) {
-            composable("Scrollable") { Scrollable(navController) }
-        }
+        composable("Profile") { Profile(navigator, isLoggedIn, toggleLogin)  }
+        composable("Dashboard") { Dashboard(navigator) }
+        composable("Scrollable") { Scrollable(navigator) }
     }
 }
 
 @Composable
-fun Profile(navController: NavController, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
+fun Profile(navigator: Navigator, isLoggedIn: Boolean, toggleLogin: () -> Unit) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
         Text(text = Screen.Profile.title)
-        NavigateButton(navController, Screen.Dashboard)
+        NavigateButton(Screen.Dashboard.title) { navigator.showDashboard() }
         Divider(color = Color.Black)
-        NavigateButton(navController, Screen.Scrollable)
+
+        if (isLoggedIn) {
+            NavigateButton(Screen.Scrollable.title) { navigator.showScrollable() }
+        }
+
         Spacer(Modifier.weight(1f))
         Button(onClick = toggleLogin) {
             Text(text = "Toggle Login to: ${!isLoggedIn}")
         }
-        NavigateBackButton(navController)
+        NavigateBackButton(navigator)
     }
 }
 
 @Composable
-fun Dashboard(navController: NavController) {
+fun Dashboard(navigator: Navigator) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
         Text(text = Screen.Dashboard.title)
         Spacer(Modifier.weight(1f))
-        NavigateBackButton(navController)
+        NavigateBackButton(navigator)
     }
 }
 
 @Composable
-fun Scrollable(navController: NavController) {
+fun Scrollable(navigator: Navigator) {
     Column(Modifier.fillMaxSize().then(Modifier.padding(8.dp))) {
-        NavigateButton(navController, Screen.Dashboard)
+        NavigateButton(Screen.Dashboard.title) { navigator.showDashboard() }
         ScrollableColumn(Modifier.weight(1f)) {
             phrases.forEach { phrase ->
                 Text(phrase, fontSize = 30.sp)
             }
         }
-        NavigateBackButton(navController)
+        NavigateBackButton(navigator)
     }
 }
 
 @Composable
-fun NavigateButton(navController: NavController, screen: Screen) {
+fun NavigateButton(screenTitle: String, onClick: () -> Unit) {
     Button(
-        onClick = { navController.navigate(screen.title) },
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = "Navigate to " + screen.title)
+        Text(text = "Navigate to $screenTitle")
     }
 }
 
 @Composable
-fun NavigateBackButton(navController: NavController) {
-    if (navController.previousBackStackEntry != null) {
+fun NavigateBackButton(navigator: Navigator) {
+    if (navigator.hasPreviousBackStackEntry) {
         Button(
-            onClick = { navController.popBackStack() },
+            onClick = { navigator.popBackStack() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(text = "Go to Previous screen")
