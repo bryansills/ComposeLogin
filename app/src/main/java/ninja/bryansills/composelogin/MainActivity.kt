@@ -27,12 +27,22 @@ class MainActivity : AppCompatActivity() {
                 var isLoggedIn by remember { mutableStateOf(false) }
                 val toggleLogin = { isLoggedIn = isLoggedIn.not() }
                 val navController = rememberNavController()
+                val navigatorFactory = NavigatorFactory(navController)
 
-                NavigationRoot(
-                    navController = navController,
-                    isLoggedIn = isLoggedIn,
-                    toggleLogin = toggleLogin
-                )
+                NavHost(navController, startDestination = "Profile") {
+                    composable("Profile") {
+                        val navigator = navigatorFactory.get(isLoggedIn)
+                        Profile(navigator, isLoggedIn, toggleLogin)
+                    }
+                    composable("Dashboard") {
+                        val navigator = navigatorFactory.get(isLoggedIn)
+                        Dashboard(navigator)
+                    }
+                    composable("Scrollable") {
+                        val navigator = navigatorFactory.get(isLoggedIn)
+                        Scrollable(navigator)
+                    }
+                }
             }
         }
     }
